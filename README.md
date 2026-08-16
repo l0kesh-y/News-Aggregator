@@ -94,12 +94,6 @@ newslens/
 
 ## Netlify Deployment
 
-- **Auto-deploy (recommended):** Connect your repository on Netlify and set the build command to `npm run build` and the publish directory to `dist`. Add the following environment variables under Site settings:
-   - `VITE_NEWS_API_KEY`
-   - `VITE_GROQ_API_KEY`
+**Demo Mode:** This deployment is configured to run in demo-only mode: the app uses bundled sample articles and a local AI-summary mock. No API keys are required.
 
-- **Manual deploy (quick):**
-   1. Build the site locally: `npm run build`
-   2. Drag-and-drop the generated `dist` folder in the Netlify app, or run `netlify deploy --dir=dist --prod` with the Netlify CLI.
-
-This repo includes `netlify.toml` and a `_redirects` file to enable SPA routing.
+If you want to re-enable live APIs later, remove the demo services in `src/services` and set the appropriate environment variables on Netlify.

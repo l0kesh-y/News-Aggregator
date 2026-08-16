@@ -1,49 +1,17 @@
-const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
-const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
-
+// Demo-only Groq service: returns a simple 3-line summary generated locally.
 export async function generateInsight(article) {
-  if (!GROQ_API_KEY) {
-    throw new Error('Groq API key is missing');
+  const delay = (ms) => new Promise(res => setTimeout(res, ms));
+  await delay(250);
+
+  const text = `${article.title}. ${article.description || ''} ${article.content || ''}`.trim();
+  // naive split into sentences, fallback to slicing if needed
+  const sentences = text.split(/(?<=[.!?])\s+/).filter(Boolean);
+  const lines = [];
+  for (let i = 0; i < 3; i++) {
+    if (sentences[i]) lines.push(sentences[i]);
+    else if (text) lines.push(text.slice(i * 80, (i + 1) * 80));
   }
 
-  const prompt = `Summarize this news article in exactly 3 lines:
-
-Title: ${article.title}
-Content: ${article.description || ''} ${article.content || ''}
-
-Provide a clear, concise 3-line summary.`;
-
-  try {
-    const response = await fetch(GROQ_API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${GROQ_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
-        messages: [
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        temperature: 0.5,
-        max_tokens: 300
-      })
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error?.message || `API error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    const summary = data.choices[0].message.content.trim();
-    
-    return { summary };
-  } catch (error) {
-    console.error('Groq API error:', error);
-    throw error;
-  }
+  const summary = lines.join('\n').trim();
+  return { summary };
 }

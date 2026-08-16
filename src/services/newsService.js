@@ -1,23 +1,24 @@
+import sampleArticles from '../data/sampleArticles';
+
 export async function fetchNews(category = 'general', page = 1, query = '') {
-  try {
-    const params = new URLSearchParams();
-    params.set('category', category);
-    params.set('page', String(page));
-    if (query) params.set('q', query);
+  // Demo-only: return filtered sample data with a tiny simulated delay
+  const delay = (ms) => new Promise(res => setTimeout(res, ms));
+  await delay(200);
 
-    const url = `/ .netlify/functions/fetch-news?${params.toString()}`.replace('/ .netlify', '/.netlify');
+  let results = sampleArticles.slice();
 
-    const response = await fetch(url);
-    const data = await response.json();
-
-    if (data.status === 'error' || data.error) {
-      console.error('NewsAPI Error:', data.message || data.error);
-      throw new Error(data.message || data.error || 'News API error');
-    }
-
-    return data.articles || [];
-  } catch (error) {
-    console.error('News API error:', error);
-    return [];
+  if (query) {
+    const q = query.toLowerCase();
+    results = results.filter(a => (a.title + ' ' + a.description + ' ' + a.content).toLowerCase().includes(q));
   }
+
+  if (category && category !== 'general') {
+    // In demo data we don't have categories; keep for compatibility
+    results = results;
+  }
+
+  // simple pagination
+  const pageSize = 12;
+  const start = (page - 1) * pageSize;
+  return results.slice(start, start + pageSize);
 }
